@@ -1,4 +1,4 @@
-package com.luiz.nativ
+package com.luiz.nativ.utils
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
