@@ -5,14 +5,15 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
+    android:padding="16dp"
     tools:context=".ui.HomeActivity">
 
     <ImageView
         android:id="@+id/imgHomeProfile"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_marginTop="60dp"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="12dp"
+        android:contentDescription="@string/profile_image_description"
         android:src="@drawable/empty_profile"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,11 +23,11 @@
         android:id="@+id/txtUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Username"
-        android:textSize="22sp"
-        android:textStyle="bold|italic"
+        android:layout_marginTop="12dp"
+        android:text="@string/label_username_placeholder"
         android:textColor="#555555"
+        android:textSize="20sp"
+        android:textStyle="bold|italic"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imgHomeProfile" />
@@ -35,21 +36,56 @@
         android:id="@+id/txtNomeCompleto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Nome Completo"
+        android:layout_marginTop="4dp"
+        android:text="@string/label_nome_completo_placeholder"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtUsername" />
 
     <Button
-        android:id="@+id/btnSair"
-        android:layout_width="200dp"
+        android:id="@+id/btnAdicionarPost"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="SAIR"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="4dp"
+        android:text="@string/action_adicionar_post"
+        app:layout_constraintEnd_toStartOf="@id/btnCarregarFeed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtNomeCompleto" />
+
+    <Button
+        android:id="@+id/btnCarregarFeed"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:text="@string/action_carregar_feed"
+        app:layout_constraintBaseline_toBaselineOf="@id/btnAdicionarPost"
+        app:layout_constraintEnd_toStartOf="@id/btnSair"
+        app:layout_constraintStart_toEndOf="@id/btnAdicionarPost" />
+
+    <Button
+        android:id="@+id/btnSair"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:text="@string/action_sair"
+        app:layout_constraintBaseline_toBaselineOf="@id/btnAdicionarPost"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnCarregarFeed" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp"
+        tools:listitem="@layout/post_item"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnAdicionarPost" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
