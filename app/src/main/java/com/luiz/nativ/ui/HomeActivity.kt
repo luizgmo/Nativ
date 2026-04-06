@@ -34,6 +34,7 @@ class HomeActivity : AppCompatActivity() {
     private val galeriaPost = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             imagemNovoPostDialog?.setImageURI(uri)
+            imagemNovoPostDialog?.visibility = android.view.View.VISIBLE
             imagemNovoPostDialog?.drawable?.let {
                 imagemPostSelecionada = Base64Converter.drawableToString(it)
             }
@@ -60,6 +61,9 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
+        // Carrega o feed automaticamente ao entrar na tela
+        carregarFeed()
+
         binding.btnAdicionarPost.setOnClickListener {
             abrirDialogNovoPost()
         }
@@ -79,11 +83,12 @@ class HomeActivity : AppCompatActivity() {
         imagemPostSelecionada = null
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_novo_post, null)
         val imagemPost = dialogView.findViewById<ImageView>(R.id.imgNovoPost)
-        val botaoSelecionarFoto = dialogView.findViewById<Button>(R.id.btnSelecionarFotoPost)
+        val botaoAnexarFoto = dialogView.findViewById<Button>(R.id.btnSelecionarFotoPost)
         val descricaoInput = dialogView.findViewById<EditText>(R.id.edtDescricaoPost)
 
         imagemNovoPostDialog = imagemPost
-        botaoSelecionarFoto.setOnClickListener {
+
+        botaoAnexarFoto.setOnClickListener {
             galeriaPost.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
@@ -97,15 +102,17 @@ class HomeActivity : AppCompatActivity() {
         dialog.setOnShowListener {
             val botaoAdicionar = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             botaoAdicionar.setOnClickListener {
-                val imageString = imagemPostSelecionada.orEmpty()
+                val descricao = descricaoInput.text.toString().trim()
 
-                val descricao = descricaoInput.text.toString().trim().ifEmpty {
-                    getString(R.string.label_descricao_placeholder)
+                // Permite postar sem foto: só exige que haja texto OU imagem
+                if (descricao.isEmpty() && imagemPostSelecionada == null) {
+                    Toast.makeText(this, getString(R.string.msg_post_vazio), Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
                 }
 
                 val postData = hashMapOf(
-                    "imageString" to imageString,
-                    "descricao" to descricao
+                    "imageString" to (imagemPostSelecionada ?: ""),
+                    "descricao" to descricao.ifEmpty { getString(R.string.label_descricao_placeholder) }
                 )
 
                 db.collection("posts")

@@ -17,4 +17,6 @@
     <string name="msg_post_sucesso">Post adicionado com sucesso.</string>
     <string name="msg_post_erro">Nao foi possivel adicionar o post.</string>
     <string name="msg_post_foto_obrigatoria">Selecione uma foto para o post.</string>
+    <string name="msg_post_vazio">Escreva algo ou anexe uma foto para publicar.</string>
+    <string name="action_anexar_foto">📎 Anexar foto (opcional)</string>
 </resources>

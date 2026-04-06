@@ -26,8 +26,9 @@ class PostAdapter(private var posts: Array<Post>) : RecyclerView.Adapter<PostAda
         holder.txtDescricao.text = post.descricao
         if (post.imagem != null) {
             holder.imgPost.setImageBitmap(post.imagem)
+            holder.imgPost.visibility = View.VISIBLE
         } else {
-            holder.imgPost.setImageResource(R.drawable.empty_profile)
+            holder.imgPost.visibility = View.GONE
         }
     }
 
@@ -38,5 +39,3 @@ class PostAdapter(private var posts: Array<Post>) : RecyclerView.Adapter<PostAda
         notifyDataSetChanged()
     }
 }
-
-

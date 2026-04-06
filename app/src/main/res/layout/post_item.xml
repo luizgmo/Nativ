@@ -23,7 +23,7 @@
             android:adjustViewBounds="true"
             android:contentDescription="@string/post_image_description"
             android:scaleType="centerCrop"
-            android:src="@drawable/empty_profile" />
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/txtDescricao"
