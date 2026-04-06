@@ -12,6 +12,8 @@ import com.luiz.nativ.model.Post
 class PostAdapter(private var posts: Array<Post>) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     class PostViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val imgAutorPerfil: ImageView = view.findViewById(R.id.imgAutorPerfil)
+        val txtAutorUsername: TextView = view.findViewById(R.id.txtAutorUsername)
         val imgPost: ImageView = view.findViewById(R.id.imgPost)
         val txtDescricao: TextView = view.findViewById(R.id.txtDescricao)
     }
@@ -23,13 +25,22 @@ class PostAdapter(private var posts: Array<Post>) : RecyclerView.Adapter<PostAda
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = posts[position]
-        holder.txtDescricao.text = post.descricao
+
+        holder.txtAutorUsername.text = post.autorUsername.ifEmpty { post.autorEmail }
+        if (post.autorFoto != null) {
+            holder.imgAutorPerfil.setImageBitmap(post.autorFoto)
+        } else {
+            holder.imgAutorPerfil.setImageResource(R.drawable.empty_profile)
+        }
+
         if (post.imagem != null) {
             holder.imgPost.setImageBitmap(post.imagem)
             holder.imgPost.visibility = View.VISIBLE
         } else {
             holder.imgPost.visibility = View.GONE
         }
+
+        holder.txtDescricao.text = post.descricao
     }
 
     override fun getItemCount(): Int = posts.size

@@ -61,7 +61,6 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        // Carrega o feed automaticamente ao entrar na tela
         carregarFeed()
 
         binding.btnAdicionarPost.setOnClickListener {
@@ -104,15 +103,17 @@ class HomeActivity : AppCompatActivity() {
             botaoAdicionar.setOnClickListener {
                 val descricao = descricaoInput.text.toString().trim()
 
-                // Permite postar sem foto: só exige que haja texto OU imagem
                 if (descricao.isEmpty() && imagemPostSelecionada == null) {
                     Toast.makeText(this, getString(R.string.msg_post_vazio), Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 
+                val emailAutor = userAuth.getEmailUsuarioLogado() ?: ""
+
                 val postData = hashMapOf(
                     "imageString" to (imagemPostSelecionada ?: ""),
-                    "descricao" to descricao.ifEmpty { getString(R.string.label_descricao_placeholder) }
+                    "descricao" to descricao.ifEmpty { getString(R.string.label_descricao_placeholder) },
+                    "autorEmail" to emailAutor
                 )
 
                 db.collection("posts")
@@ -140,21 +141,57 @@ class HomeActivity : AppCompatActivity() {
         db.collection("posts").get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    posts = ArrayList()
-                    val documents = task.result
+                    val documents = task.result.documents
+                    val totalPosts = documents.size
 
-                    for (document in documents.documents) {
-                        val imageString = document.data?.get("imageString")?.toString().orEmpty()
-                        val descricao = document.data?.get("descricao")?.toString().orEmpty()
-                        val bitmap = if (imageString.isNotEmpty()) {
-                            runCatching { Base64Converter.stringToBitmap(imageString) }.getOrNull()
-                        } else {
-                            null
-                        }
-                        posts.add(Post(descricao, bitmap))
+                    if (totalPosts == 0) {
+                        adapter.updatePosts(emptyArray())
+                        return@addOnCompleteListener
                     }
 
-                    adapter.updatePosts(posts.toTypedArray())
+                    val postsTemp = arrayOfNulls<Post>(totalPosts)
+                    var postsCarregados = 0
+
+                    for ((index, document) in documents.withIndex()) {
+                        val imageString = document.data?.get("imageString")?.toString().orEmpty()
+                        val descricao = document.data?.get("descricao")?.toString().orEmpty()
+                        val autorEmail = document.data?.get("autorEmail")?.toString().orEmpty()
+
+                        val bitmap = if (imageString.isNotEmpty()) {
+                            runCatching { Base64Converter.stringToBitmap(imageString) }.getOrNull()
+                        } else null
+
+                        if (autorEmail.isNotEmpty()) {
+                            userDAO.buscarPerfil(autorEmail) { user ->
+                                val autorFoto = user?.fotoPerfil?.let {
+                                    runCatching { Base64Converter.stringToBitmap(it) }.getOrNull()
+                                }
+                                postsTemp[index] = Post(
+                                    descricao = descricao,
+                                    imagem = bitmap,
+                                    autorEmail = autorEmail,
+                                    autorUsername = user?.username ?: autorEmail,
+                                    autorFoto = autorFoto
+                                )
+                                postsCarregados++
+                                if (postsCarregados == totalPosts) {
+                                    adapter.updatePosts(postsTemp.filterNotNull().toTypedArray())
+                                }
+                            }
+                        } else {
+                            postsTemp[index] = Post(
+                                descricao = descricao,
+                                imagem = bitmap,
+                                autorEmail = "",
+                                autorUsername = "",
+                                autorFoto = null
+                            )
+                            postsCarregados++
+                            if (postsCarregados == totalPosts) {
+                                adapter.updatePosts(postsTemp.filterNotNull().toTypedArray())
+                            }
+                        }
+                    }
                 } else {
                     Toast.makeText(this, getString(R.string.msg_feed_erro), Toast.LENGTH_SHORT).show()
                 }
