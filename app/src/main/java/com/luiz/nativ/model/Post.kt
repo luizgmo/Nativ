@@ -7,5 +7,6 @@ data class Post(
     val imagem: Bitmap? = null,
     val autorEmail: String = "",
     val autorUsername: String = "",
-    val autorFoto: Bitmap? = null
+    val autorFoto: Bitmap? = null,
+    val cidade: String = ""
 )
