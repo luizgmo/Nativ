@@ -26,22 +26,58 @@ class ProfileActivity : AppCompatActivity() {
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val email = userAuth.getEmailUsuarioLogado() ?: ""
+        userDAO.buscarPerfil(email) { user ->
+            if (user != null) {
+                runOnUiThread {
+                    binding.edtUsername.setText(user.username)
+                    binding.edtFullName.setText(user.nomeCompleto)
+                    if (user.fotoPerfil.isNotEmpty()) {
+                        runCatching {
+                            binding.profilePicture.setImageBitmap(Base64Converter.stringToBitmap(user.fotoPerfil))
+                        }
+                    }
+                }
+            }
+        }
+
         binding.btnAlterarFoto.setOnClickListener {
             galeria.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
         binding.btnSalvarPerfil.setOnClickListener {
-            val email = userAuth.getEmailUsuarioLogado() ?: ""
-            val user = User(
-                email,
-                binding.edtUsername.text.toString(),
-                binding.edtFullName.text.toString(),
+            val novaSenha = binding.edtNovaSenha.text.toString().trim()
+
+            if (novaSenha.isNotEmpty()) {
+                if (novaSenha.length < 6) {
+                    Toast.makeText(this, "A senha deve ter pelo menos 6 caracteres", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                userAuth.atualizarSenha(novaSenha) { sucesso, erro ->
+                    if (!sucesso) {
+                        Toast.makeText(this, "Erro ao atualizar senha: $erro", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            val fotoString = runCatching {
                 Base64Converter.drawableToString(binding.profilePicture.drawable)
+            }.getOrDefault("")
+
+            val user = User(
+                email = email,
+                username = binding.edtUsername.text.toString().trim(),
+                nomeCompleto = binding.edtFullName.text.toString().trim(),
+                fotoPerfil = fotoString
             )
+
             userDAO.salvarPerfil(user) { sucesso ->
                 if (sucesso) {
+                    Toast.makeText(this, "Perfil atualizado!", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, HomeActivity::class.java))
                     finish()
+                } else {
+                    Toast.makeText(this, "Erro ao salvar perfil", Toast.LENGTH_SHORT).show()
                 }
             }
         }

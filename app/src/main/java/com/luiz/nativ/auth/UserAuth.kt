@@ -17,6 +17,13 @@ class UserAuth {
             }
     }
 
+    fun atualizarSenha(novaSenha: String, callback: (Boolean, String?) -> Unit) {
+        auth.currentUser?.updatePassword(novaSenha)
+            ?.addOnCompleteListener { task ->
+                callback(task.isSuccessful, task.exception?.message)
+            } ?: callback(false, "Usuário não autenticado")
+    }
+
     fun getEmailUsuarioLogado(): String? = auth.currentUser?.email
 
     fun logout() = auth.signOut()
