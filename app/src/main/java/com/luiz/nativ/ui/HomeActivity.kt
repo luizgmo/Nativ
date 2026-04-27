@@ -1,13 +1,16 @@
 package com.luiz.nativ.ui
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
-import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -98,21 +101,27 @@ class HomeActivity : AppCompatActivity() {
             }
         })
 
-        binding.edtBuscarCidade.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                executarBusca()
-                true
-            } else false
+        binding.edtBuscarCidade.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val texto = s.toString().trim()
+                if (texto.length >= 3) {
+                    filtroCidade = texto
+                    binding.btnLimparBusca.visibility = View.VISIBLE
+                    buscarPorCidadeRealtime(texto)
+                } else if (texto.isEmpty() && filtroCidade != null) {
+                    limparBusca()
+                }
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        binding.btnLimparBusca.setOnClickListener {
+            limparBusca()
         }
-        binding.btnBuscar.setOnClickListener { executarBusca() }
-        binding.btnLimparBusca.setOnClickListener { limparBusca() }
 
         binding.btnAdicionarPost.setOnClickListener { abrirDialogNovoPost() }
-
-        binding.btnPerfil.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
-
+        binding.btnPerfil.setOnClickListener { startActivity(Intent(this, ProfileActivity::class.java)) }
         binding.btnSair.setOnClickListener {
             userAuth.logout()
             startActivity(Intent(this, MainActivity::class.java))
@@ -122,53 +131,46 @@ class HomeActivity : AppCompatActivity() {
         carregarFeed(paginar = false)
     }
 
-    private fun executarBusca() {
-        val cidade = binding.edtBuscarCidade.text.toString().trim()
-        if (cidade.isEmpty()) { limparBusca(); return }
-        filtroCidade = cidade
-        binding.btnLimparBusca.visibility = View.VISIBLE
-        buscarPorCidade(cidade)
-    }
-
     private fun limparBusca() {
         filtroCidade = null
-        binding.edtBuscarCidade.setText("")
+        if (binding.edtBuscarCidade.text.isNotEmpty()) {
+            binding.edtBuscarCidade.setText("")
+        }
         binding.btnLimparBusca.visibility = View.GONE
+
+        val view = this.currentFocus
+        if (view != null) {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+
         ultimoTimestamp = null
         adapter.setPosts(emptyList())
         carregarFeed(paginar = false)
     }
 
-    private fun buscarPorCidade(cidade: String) {
+    private fun buscarPorCidadeRealtime(texto: String) {
         carregando = true
         db.collection("posts")
-            .whereEqualTo("cidade", cidade)
-            .orderBy("data", Query.Direction.DESCENDING)
+            .whereGreaterThanOrEqualTo("cidade", texto)
+            .whereLessThanOrEqualTo("cidade", texto + "\uf8ff")
             .get()
-            .addOnCompleteListener { task ->
+            .addOnSuccessListener { task ->
                 carregando = false
-                if (task.isSuccessful) {
-                    val docs = task.result.documents
-                    if (docs.isEmpty()) {
-                        adapter.setPosts(emptyList())
-                        Toast.makeText(this, "Nenhum post encontrado para \"$cidade\"", Toast.LENGTH_SHORT).show()
-                        return@addOnCompleteListener
-                    }
-                    montarPosts(docs) { posts -> adapter.setPosts(posts) }
+                val docs = task.documents
+                if (docs.isEmpty()) {
+                    adapter.setPosts(emptyList())
                 } else {
-                    Toast.makeText(this, getString(R.string.msg_feed_erro), Toast.LENGTH_SHORT).show()
+                    montarPosts(docs) { posts -> adapter.setPosts(posts) }
                 }
             }
+            .addOnFailureListener { carregando = false }
     }
 
     private fun carregarFeed(paginar: Boolean) {
         if (carregando) return
         carregando = true
-
-        if (!paginar) {
-            ultimoTimestamp = null
-            adapter.setPosts(emptyList())
-        }
+        if (!paginar) ultimoTimestamp = null
 
         var query = db.collection("posts")
             .orderBy("data", Query.Direction.DESCENDING)
@@ -176,177 +178,102 @@ class HomeActivity : AppCompatActivity() {
 
         ultimoTimestamp?.let { query = query.startAfter(it) }
 
-        query.get().addOnCompleteListener { task ->
+        query.get().addOnSuccessListener { task ->
             carregando = false
-            if (task.isSuccessful) {
-                val docs = task.result.documents
-                if (docs.isEmpty()) return@addOnCompleteListener
-
-                ultimoTimestamp = docs.last().getTimestamp("data")
-
-                montarPosts(docs) { posts ->
-                    if (paginar) adapter.addPosts(posts)
-                    else adapter.setPosts(posts)
-                }
-            } else {
-                Toast.makeText(this, getString(R.string.msg_feed_erro), Toast.LENGTH_SHORT).show()
+            val docs = task.documents
+            if (docs.isEmpty()) return@addOnSuccessListener
+            ultimoTimestamp = docs.last().getTimestamp("data")
+            montarPosts(docs) { posts ->
+                if (paginar) adapter.addPosts(posts)
+                else adapter.setPosts(posts)
             }
-        }
+        }.addOnFailureListener { carregando = false }
     }
 
-    private fun montarPosts(
-        docs: List<com.google.firebase.firestore.DocumentSnapshot>,
-        onReady: (List<Post>) -> Unit
-    ) {
+    private fun montarPosts(docs: List<com.google.firebase.firestore.DocumentSnapshot>, onReady: (List<Post>) -> Unit) {
         val total = docs.size
+        if (total == 0) { onReady(emptyList()); return }
         val postsTemp = arrayOfNulls<Post>(total)
         var prontos = 0
-
         for ((index, doc) in docs.withIndex()) {
-            val imageString = doc.data?.get("imageString")?.toString().orEmpty()
-            val descricao   = doc.data?.get("descricao")?.toString().orEmpty()
-            val autorEmail  = doc.data?.get("autorEmail")?.toString().orEmpty()
-            val cidade      = doc.data?.get("cidade")?.toString().orEmpty()
-
-            val bitmap = if (imageString.isNotEmpty())
-                runCatching { Base64Converter.stringToBitmap(imageString) }.getOrNull()
-            else null
-
+            val imageString = doc.getString("imageString").orEmpty()
+            val descricao = doc.getString("descricao").orEmpty()
+            val autorEmail = doc.getString("autorEmail").orEmpty()
+            val cidade = doc.getString("cidade").orEmpty()
+            val bitmap = if (imageString.isNotEmpty()) runCatching { Base64Converter.stringToBitmap(imageString) }.getOrNull() else null
             fun salvar(username: String, autorFoto: android.graphics.Bitmap?) {
-                postsTemp[index] = Post(
-                    descricao = descricao,
-                    imagem = bitmap,
-                    autorEmail = autorEmail,
-                    autorUsername = username,
-                    autorFoto = autorFoto,
-                    cidade = cidade
-                )
+                postsTemp[index] = Post(descricao, bitmap, autorEmail, username, autorFoto, cidade)
                 prontos++
-                if (prontos == total) {
-                    runOnUiThread { onReady(postsTemp.filterNotNull()) }
-                }
+                if (prontos == total) runOnUiThread { onReady(postsTemp.filterNotNull()) }
             }
-
             if (autorEmail.isNotEmpty()) {
                 userDAO.buscarPerfil(autorEmail) { user ->
-                    val foto = user?.fotoPerfil?.let {
-                        runCatching { Base64Converter.stringToBitmap(it) }.getOrNull()
-                    }
+                    val foto = user?.fotoPerfil?.let { runCatching { Base64Converter.stringToBitmap(it) }.getOrNull() }
                     salvar(user?.username ?: autorEmail, foto)
                 }
-            } else {
-                salvar("", null)
-            }
+            } else salvar("", null)
         }
     }
 
     private fun abrirDialogNovoPost() {
         imagemPostSelecionada = null
         cidadeNovoPost = null
-
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_novo_post, null)
-        val imagemPost      = dialogView.findViewById<ImageView>(R.id.imgNovoPost)
-        val btnAnexar       = dialogView.findViewById<Button>(R.id.btnSelecionarFotoPost)
-        val descricaoInput  = dialogView.findViewById<EditText>(R.id.edtDescricaoPost)
-        val txtCidade       = dialogView.findViewById<TextView>(R.id.txtCidadePost)
-
+        val imagemPost = dialogView.findViewById<ImageView>(R.id.imgNovoPost)
+        val btnAnexar = dialogView.findViewById<Button>(R.id.btnSelecionarFotoPost)
+        val descricaoInput = dialogView.findViewById<EditText>(R.id.edtDescricaoPost)
+        val txtCidade = dialogView.findViewById<TextView>(R.id.txtCidadePost)
         imagemNovoPostDialog = imagemPost
-
-        btnAnexar.setOnClickListener {
-            galeriaPost.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        }
-
+        btnAnexar.setOnClickListener { galeriaPost.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
         obterCidade { cidade ->
             runOnUiThread {
                 if (cidade != null) {
                     cidadeNovoPost = cidade
                     txtCidade.text = "📍 $cidade"
                     txtCidade.visibility = View.VISIBLE
-                } else {
-                    txtCidade.visibility = View.GONE
                 }
             }
         }
-
         val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.title_novo_post)
             .setView(dialogView)
             .setPositiveButton(R.string.action_adicionar, null)
             .setNegativeButton(R.string.action_cancelar, null)
             .create()
-
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val descricao = descricaoInput.text.toString().trim()
-
-                if (descricao.isEmpty() && imagemPostSelecionada == null) {
-                    Toast.makeText(this, getString(R.string.msg_post_vazio), Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
+                if (descricao.isEmpty() && imagemPostSelecionada == null) return@setOnClickListener
                 val emailAutor = userAuth.getEmailUsuarioLogado() ?: ""
                 val postData = hashMapOf(
                     "imageString" to (imagemPostSelecionada ?: ""),
-                    "descricao"   to descricao,
-                    "autorEmail"  to emailAutor,
-                    "cidade"      to (cidadeNovoPost ?: ""),
-                    "data"        to Timestamp.now()
+                    "descricao" to descricao,
+                    "autorEmail" to emailAutor,
+                    "cidade" to (cidadeNovoPost ?: ""),
+                    "data" to Timestamp.now()
                 )
-
-                db.collection("posts").add(postData)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, getString(R.string.msg_post_sucesso), Toast.LENGTH_SHORT).show()
-                        dialog.dismiss()
-                        ultimoTimestamp = null
-                        carregarFeed(paginar = false)
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(this, getString(R.string.msg_post_erro), Toast.LENGTH_SHORT).show()
-                    }
+                db.collection("posts").add(postData).addOnSuccessListener {
+                    dialog.dismiss()
+                    carregarFeed(paginar = false)
+                }
             }
         }
-
-        dialog.setOnDismissListener {
-            imagemNovoPostDialog = null
-            imagemPostSelecionada = null
-        }
-
         dialog.show()
     }
 
     private fun obterCidade(callback: (String?) -> Unit) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-                LOCATION_PERMISSION_CODE
-            )
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_CODE)
             callback(null)
             return
         }
-
-        val helper = LocalizacaoHelper(applicationContext)
+        val helper = LocalizacaoHelper(this)
         helper.obterLocalizacaoAtual(object : LocalizacaoHelper.Callback {
             override fun onLocalizacaoRecebida(endereco: Address, latitude: Double, longitude: Double) {
-                val cidade = endereco.locality
-                    ?: endereco.subAdminArea
-                    ?: "Cidade desconhecida"
+                val cidade = endereco.locality ?: endereco.subAdminArea ?: "Desconhecida"
                 callback(cidade)
             }
-
             override fun onErro(mensagem: String) = callback(null)
         })
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }
