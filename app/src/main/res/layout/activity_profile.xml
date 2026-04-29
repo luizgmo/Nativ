@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#121212"
     tools:context=".ui.ProfileActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -13,11 +14,12 @@
 
         <ImageView
             android:id="@+id/profilePicture"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
             android:layout_marginTop="40dp"
             android:scaleType="centerCrop"
             android:src="@drawable/empty_profile"
+            android:elevation="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -26,9 +28,16 @@
             android:id="@+id/btnAlterarFoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:text="ALTERAR FOTO"
-            android:textSize="12sp"
+            android:textColor="#FF7A00"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            style="?attr/materialButtonOutlinedStyle"
+            app:strokeColor="#FF7A00"
+            app:strokeWidth="1dp"
+            app:backgroundTint="#121212"
+            app:cornerRadius="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/profilePicture" />
@@ -36,8 +45,12 @@
         <EditText
             android:id="@+id/edtUsername"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="32dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="40dp"
+            android:paddingHorizontal="16dp"
+            android:background="#1E1E1E"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#757575"
             android:hint="Nome de usuário (público)"
             android:inputType="text"
             app:layout_constraintEnd_toEndOf="parent"
@@ -47,8 +60,12 @@
         <EditText
             android:id="@+id/edtFullName"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="56dp"
             android:layout_marginTop="16dp"
+            android:paddingHorizontal="16dp"
+            android:background="#1E1E1E"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#757575"
             android:hint="Nome Completo"
             android:inputType="textPersonName"
             app:layout_constraintEnd_toEndOf="parent"
@@ -58,8 +75,12 @@
         <EditText
             android:id="@+id/edtNovaSenha"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="56dp"
             android:layout_marginTop="16dp"
+            android:paddingHorizontal="16dp"
+            android:background="#1E1E1E"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#757575"
             android:hint="Nova senha (deixe vazio para não alterar)"
             android:inputType="textPassword"
             android:importantForAutofill="no"
@@ -69,10 +90,15 @@
 
         <Button
             android:id="@+id/btnSalvarPerfil"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
             android:layout_marginTop="48dp"
-            android:text="SALVAR"
+            android:text="SALVAR ALTERAÇÕES"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            app:backgroundTint="#FF7A00"
+            app:cornerRadius="24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/edtNovaSenha" />

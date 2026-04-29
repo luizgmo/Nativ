@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
+    android:background="#121212"
     tools:context=".ui.HomeActivity">
 
     <ImageView
@@ -16,6 +17,8 @@
         android:contentDescription="@string/profile_image_description"
         android:src="@drawable/empty_profile"
         android:scaleType="centerCrop"
+        android:background="@null"
+        android:elevation="4dp"
         app:layout_constraintEnd_toStartOf="@id/layoutNomes"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -36,25 +39,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/label_username_placeholder"
-            android:textColor="#222222"
-            android:textSize="16sp"
-            android:textStyle="bold|italic" />
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/txtNomeCompleto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/label_nome_completo_placeholder"
-            android:textSize="13sp"
-            android:textColor="#555555" />
+            android:textSize="14sp"
+            android:textColor="#A0A0A0" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layoutBusca"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal"
+        android:background="#1E1E1E"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        android:elevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imgHomeProfile">
@@ -62,9 +69,12 @@
         <EditText
             android:id="@+id/edtBuscarCidade"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:hint="Buscar por cidade..."
+            android:textColorHint="#757575"
+            android:textColor="#FFFFFF"
+            android:background="@android:color/transparent"
             android:inputType="text"
             android:importantForAutofill="no"
             android:imeOptions="actionSearch" />
@@ -76,7 +86,8 @@
             android:contentDescription="Limpar busca"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
+            app:tint="#FF7A00"
+            android:padding="12dp"
             android:visibility="gone" />
 
     </LinearLayout>
@@ -85,8 +96,9 @@
         android:id="@+id/layoutBotoes"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:orientation="horizontal"
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layoutBusca">
@@ -95,9 +107,15 @@
             android:id="@+id/btnAdicionarPost"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="1.2"
             android:layout_marginEnd="4dp"
-            android:text="@string/action_adicionar_post" />
+            android:padding="0dp"
+            android:text="Postar"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:backgroundTint="#FF7A00"
+            app:cornerRadius="24dp" />
 
         <Button
             android:id="@+id/btnPerfil"
@@ -106,15 +124,28 @@
             android:layout_weight="1"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
-            android:text="Perfil" />
+            android:text="Perfil"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:backgroundTint="#333333"
+            app:cornerRadius="24dp" />
 
         <Button
             android:id="@+id/btnSair"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0.8"
             android:layout_marginStart="4dp"
-            android:text="@string/action_sair" />
+            android:text="Sair"
+            android:textColor="#FF7A00"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            style="?attr/materialButtonOutlinedStyle"
+            app:strokeColor="#FF7A00"
+            app:strokeWidth="2dp"
+            app:backgroundTint="#121212"
+            app:cornerRadius="24dp" />
 
     </LinearLayout>
 
@@ -122,9 +153,9 @@
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:clipToPadding="false"
-        android:paddingBottom="8dp"
+        android:paddingBottom="16dp"
         tools:listitem="@layout/post_item"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

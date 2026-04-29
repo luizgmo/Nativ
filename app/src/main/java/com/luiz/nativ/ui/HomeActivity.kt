@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Address
 import android.os.Bundle
 import android.text.Editable
@@ -235,12 +236,13 @@ class HomeActivity : AppCompatActivity() {
             }
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle(R.string.title_novo_post)
             .setView(dialogView)
             .setPositiveButton(R.string.action_adicionar, null)
             .setNegativeButton(R.string.action_cancelar, null)
             .create()
         dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#FF7A00"))
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#A0A0A0"))
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val descricao = descricaoInput.text.toString().trim()
                 if (descricao.isEmpty() && imagemPostSelecionada == null) return@setOnClickListener
@@ -259,6 +261,7 @@ class HomeActivity : AppCompatActivity() {
             }
         }
         dialog.show()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
 
     private fun obterCidade(callback: (String?) -> Unit) {
