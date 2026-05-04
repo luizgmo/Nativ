@@ -24,13 +24,15 @@
             android:gravity="center_vertical"
             android:layout_marginBottom="14dp">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/imgAutorPerfil"
                 android:layout_width="44dp"
                 android:layout_height="44dp"
-                android:contentDescription="@string/profile_image_description"
                 android:scaleType="centerCrop"
-                android:src="@drawable/empty_profile" />
+                android:src="@drawable/empty_profile"
+                app:shapeAppearanceOverlay="@style/CircleImage"
+                app:strokeColor="#333333"
+                app:strokeWidth="1dp" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -84,7 +86,7 @@
             android:id="@+id/txtDescricao"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="10dp"
             android:text="@string/label_descricao_placeholder"
             android:textColor="#D0D0D0"
             android:lineSpacingExtra="4dp"

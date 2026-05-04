@@ -12,14 +12,17 @@
         android:layout_height="wrap_content"
         android:padding="24dp">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/profilePicture"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:layout_marginTop="40dp"
             android:scaleType="centerCrop"
             android:src="@drawable/empty_profile"
             android:elevation="8dp"
+            app:strokeColor="#FF7A00"
+            app:strokeWidth="3dp"
+            app:shapeAppearanceOverlay="@style/CircleImage"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

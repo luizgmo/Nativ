@@ -9,16 +9,17 @@
     android:background="#121212"
     tools:context=".ui.HomeActivity">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imgHomeProfile"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_marginTop="12dp"
-        android:contentDescription="@string/profile_image_description"
-        android:src="@drawable/empty_profile"
+        android:padding="2dp"
         android:scaleType="centerCrop"
-        android:background="@null"
-        android:elevation="4dp"
+        android:src="@drawable/empty_profile"
+        app:strokeColor="#FF7A00"
+        app:strokeWidth="2dp"
+        app:shapeAppearanceOverlay="@style/CircleImage"
         app:layout_constraintEnd_toStartOf="@id/layoutNomes"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

@@ -12,9 +12,15 @@ class Base64Converter {
     companion object {
         fun drawableToString(drawable: Drawable): String {
             val pictureDrawable = drawable as BitmapDrawable
-            val bitmap = pictureDrawable.bitmap.scale(150, 150)
+            val originalBitmap = pictureDrawable.bitmap
+
+            val ratio = originalBitmap.width.toFloat() / originalBitmap.height.toFloat()
+            val width = if (originalBitmap.width > originalBitmap.height) 800 else (800 * ratio).toInt()
+            val height = if (originalBitmap.width > originalBitmap.height) (800 / ratio).toInt() else 800
+            val bitmap = Bitmap.createScaledBitmap(originalBitmap, width, height, true)
+
             val outputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
             val imageString = Base64.encodeToString(outputStream.toByteArray(), 0)
             return imageString
         }
