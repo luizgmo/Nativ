@@ -5,14 +5,7 @@ Este projeto foi desenvolvido como parte do **Projeto Prático Avaliativo do 1º
 O objetivo do aplicativo é permitir que utilizadores compartilhem fotos, textos e a sua localização atual (cidade) numa rede social sincronizada em tempo real.
 
 ## 📺 Demonstração
-
-> - Demonstração das funcionalidades básicas.
-
 https://github.com/user-attachments/assets/bebd23f7-c10c-4a66-8883-94a032cb4736
-
-
-
-
 
 ---
 
@@ -56,7 +49,7 @@ https://github.com/user-attachments/assets/bebd23f7-c10c-4a66-8883-94a032cb4736
 ---
 
 ## 🎥 Vídeo Explicativo do Código
-> - Explicação detalhada da estrutura e lógica de programação.
+https://github.com/user-attachments/assets/16958cef-96a3-47b4-9b21-c7160ca15571
 
 ---
 **Desenvolvido por:** Luiz Gustavo Monico  
