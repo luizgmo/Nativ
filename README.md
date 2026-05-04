@@ -8,6 +8,12 @@ O objetivo do aplicativo é permitir que utilizadores compartilhem fotos, textos
 
 > - Demonstração das funcionalidades básicas.
 
+https://github.com/user-attachments/assets/bebd23f7-c10c-4a66-8883-94a032cb4736
+
+
+
+
+
 ---
 
 ## 🚀 Funcionalidades Implementadas
