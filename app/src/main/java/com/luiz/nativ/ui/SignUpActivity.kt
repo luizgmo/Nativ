@@ -9,7 +9,9 @@ import com.luiz.nativ.databinding.ActivitySignUpBinding
 
 // tela de cadastro de conta
 class SignUpActivity : AppCompatActivity() {
+    // view binding da tela
     private lateinit var binding: ActivitySignUpBinding
+    // acesso a autenticacao
     private val userAuth = UserAuth()
 
     // inicializa a tela de cadastro

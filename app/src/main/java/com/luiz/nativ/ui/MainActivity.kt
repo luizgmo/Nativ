@@ -10,7 +10,9 @@ import com.luiz.nativ.databinding.ActivityMainBinding
 
 // tela de login do app
 class MainActivity : AppCompatActivity() {
+    // view binding da tela
     private lateinit var binding: ActivityMainBinding
+    // acesso a autenticacao
     private val userAuth = UserAuth()
 
     // inicializa a tela e verifica login automatico

@@ -14,8 +14,11 @@ import com.luiz.nativ.databinding.ActivityProfileBinding
 
 // tela de perfil do usuario
 class ProfileActivity : AppCompatActivity() {
+    // view binding da tela
     private lateinit var binding: ActivityProfileBinding
+    // acesso a autenticacao
     private val userAuth = UserAuth()
+    // acesso a dados do usuario
     private val userDAO = UserDAO()
 
     // recebe a imagem escolhida para a foto de perfil
