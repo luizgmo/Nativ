@@ -39,15 +39,10 @@ import com.luiz.nativ.databinding.ActivityHomeBinding
 // tela principal com feed e criacao de posts
 class HomeActivity : AppCompatActivity() {
 
-    // view binding da tela
     private lateinit var binding: ActivityHomeBinding
-    // acesso a autenticacao
     private val userAuth = UserAuth()
-    // acesso a dados do usuario
     private val userDAO = UserDAO()
-    // acesso ao firestore
     private val db = FirebaseFirestore.getInstance()
-    // adapter do feed
     private lateinit var adapter: PostAdapter
 
     // configuracao de paginacao do feed
@@ -148,7 +143,6 @@ class HomeActivity : AppCompatActivity() {
             finish()
         }
 
-        // carrega o feed inicial
         carregarFeed(paginar = false)
     }
 
