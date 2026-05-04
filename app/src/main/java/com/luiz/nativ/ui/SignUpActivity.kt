@@ -7,15 +7,20 @@ import androidx.appcompat.app.AppCompatActivity
 import com.luiz.nativ.auth.UserAuth
 import com.luiz.nativ.databinding.ActivitySignUpBinding
 
+// tela de cadastro de conta
 class SignUpActivity : AppCompatActivity() {
+    // view binding da tela
     private lateinit var binding: ActivitySignUpBinding
+    // acesso a autenticacao
     private val userAuth = UserAuth()
 
+    // inicializa a tela de cadastro
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySignUpBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // valida dados e tenta criar a conta
         binding.btnCriarConta.setOnClickListener {
             val email = binding.edtEmailSignUp.text.toString()
             val pass = binding.edtPasswordSignUp.text.toString()

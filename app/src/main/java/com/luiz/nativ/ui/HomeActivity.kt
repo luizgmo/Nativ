@@ -36,25 +36,35 @@ import com.luiz.nativ.utils.Base64Converter
 import com.luiz.nativ.utils.LocalizacaoHelper
 import com.luiz.nativ.databinding.ActivityHomeBinding
 
+// tela principal com feed e criacao de posts
 class HomeActivity : AppCompatActivity() {
 
+    // view binding da tela
     private lateinit var binding: ActivityHomeBinding
+    // acesso a autenticacao
     private val userAuth = UserAuth()
+    // acesso a dados do usuario
     private val userDAO = UserDAO()
+    // acesso ao firestore
     private val db = FirebaseFirestore.getInstance()
+    // adapter do feed
     private lateinit var adapter: PostAdapter
 
+    // configuracao de paginacao do feed
     private val PAGE_SIZE = 5L
     private var ultimoTimestamp: Timestamp? = null
     private var carregando = false
     private var filtroCidade: String? = null
 
+    // dados temporarios do novo post
     private var imagemPostSelecionada: String? = null
     private var imagemNovoPostDialog: ImageView? = null
     private var cidadeNovoPost: String? = null
 
+    // codigo da permissao de localizacao
     private val LOCATION_PERMISSION_CODE = 1001
 
+    // recebe a imagem escolhida para o novo post
     private val galeriaPost = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             imagemNovoPostDialog?.setImageURI(uri)
@@ -65,15 +75,18 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    // inicializa a tela e configura a logica principal
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // configura o recyclerview do feed
         adapter = PostAdapter()
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
 
+        // carrega dados do usuario logado
         val email = userAuth.getEmailUsuarioLogado()
         if (email != null) {
             userDAO.buscarPerfil(email) { user ->
@@ -91,6 +104,7 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
+        // faz paginacao quando chega perto do fim da lista
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val layout = recyclerView.layoutManager as LinearLayoutManager
@@ -102,6 +116,7 @@ class HomeActivity : AppCompatActivity() {
             }
         })
 
+        // filtro por cidade digitada
         binding.edtBuscarCidade.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -117,21 +132,27 @@ class HomeActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
+        // botao para limpar o filtro de cidade
         binding.btnLimparBusca.setOnClickListener {
             limparBusca()
         }
 
+        // abre dialog para criar post
         binding.btnAdicionarPost.setOnClickListener { abrirDialogNovoPost() }
+        // abre a tela de perfil
         binding.btnPerfil.setOnClickListener { startActivity(Intent(this, ProfileActivity::class.java)) }
+        // faz logout e volta para login
         binding.btnSair.setOnClickListener {
             userAuth.logout()
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
 
+        // carrega o feed inicial
         carregarFeed(paginar = false)
     }
 
+    // limpa filtro e recarrega o feed
     private fun limparBusca() {
         filtroCidade = null
         if (binding.edtBuscarCidade.text.isNotEmpty()) {
@@ -139,6 +160,7 @@ class HomeActivity : AppCompatActivity() {
         }
         binding.btnLimparBusca.visibility = View.GONE
 
+        // esconde o teclado se estiver aberto
         val view = this.currentFocus
         if (view != null) {
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -150,6 +172,7 @@ class HomeActivity : AppCompatActivity() {
         carregarFeed(paginar = false)
     }
 
+    // busca posts pela cidade com filtro de texto
     private fun buscarPorCidadeRealtime(texto: String) {
         carregando = true
         db.collection("posts")
@@ -168,6 +191,7 @@ class HomeActivity : AppCompatActivity() {
             .addOnFailureListener { carregando = false }
     }
 
+    // carrega o feed com opcao de paginacao
     private fun carregarFeed(paginar: Boolean) {
         if (carregando) return
         carregando = true
@@ -191,6 +215,7 @@ class HomeActivity : AppCompatActivity() {
         }.addOnFailureListener { carregando = false }
     }
 
+    // monta a lista de posts com dados completos
     private fun montarPosts(docs: List<com.google.firebase.firestore.DocumentSnapshot>, onReady: (List<Post>) -> Unit) {
         val total = docs.size
         if (total == 0) { onReady(emptyList()); return }
@@ -216,6 +241,7 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    // abre o dialog para criar um novo post
     private fun abrirDialogNovoPost() {
         imagemPostSelecionada = null
         cidadeNovoPost = null
@@ -264,6 +290,7 @@ class HomeActivity : AppCompatActivity() {
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
 
+    // tenta obter a cidade atual usando a localizacao
     private fun obterCidade(callback: (String?) -> Unit) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_CODE)

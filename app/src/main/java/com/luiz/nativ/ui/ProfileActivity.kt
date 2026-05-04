@@ -12,20 +12,27 @@ import com.luiz.nativ.model.User
 import com.luiz.nativ.utils.Base64Converter
 import com.luiz.nativ.databinding.ActivityProfileBinding
 
+// tela de perfil do usuario
 class ProfileActivity : AppCompatActivity() {
+    // view binding da tela
     private lateinit var binding: ActivityProfileBinding
+    // acesso a autenticacao
     private val userAuth = UserAuth()
+    // acesso a dados do usuario
     private val userDAO = UserDAO()
 
+    // recebe a imagem escolhida para a foto de perfil
     private val galeria = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) binding.profilePicture.setImageURI(uri)
     }
 
+    // inicializa a tela e carrega dados do perfil
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // busca dados atuais do usuario
         val email = userAuth.getEmailUsuarioLogado() ?: ""
         userDAO.buscarPerfil(email) { user ->
             if (user != null) {
@@ -41,10 +48,12 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
 
+        // abre a galeria para escolher nova foto
         binding.btnAlterarFoto.setOnClickListener {
             galeria.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
+        // salva alteracoes do perfil e opcionalmente atualiza senha
         binding.btnSalvarPerfil.setOnClickListener {
             val novaSenha = binding.edtNovaSenha.text.toString().trim()
 

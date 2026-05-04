@@ -8,13 +8,18 @@ import com.google.firebase.auth.FirebaseAuth
 import com.luiz.nativ.auth.UserAuth
 import com.luiz.nativ.databinding.ActivityMainBinding
 
+// tela de login do app
 class MainActivity : AppCompatActivity() {
+    // view binding da tela
     private lateinit var binding: ActivityMainBinding
+    // acesso a autenticacao
     private val userAuth = UserAuth()
 
+    // inicializa a tela e verifica login automatico
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // se ja estiver logado vai direto para home
         if (FirebaseAuth.getInstance().currentUser != null) {
             startActivity(Intent(this, HomeActivity::class.java))
             finish()
@@ -24,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // valida campos e tenta login
         binding.btnLogar.setOnClickListener {
             val email = binding.edtEmail.text.toString().trim()
             val pass = binding.edtPassword.text.toString()
@@ -43,6 +49,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // abre a tela de cadastro
         binding.btnCadastrar.setOnClickListener {
             startActivity(Intent(this, SignUpActivity::class.java))
         }

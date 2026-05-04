@@ -13,16 +13,19 @@ import com.google.android.gms.location.Priority
 import java.io.IOException
 import java.util.Locale
 
+// helper para pegar localizacao e converter em endereco
 class LocalizacaoHelper(
     private val context: Context,
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
 ) {
+    // callback simples para sucesso e erro
     interface Callback {
         fun onLocalizacaoRecebida(endereco: Address, latitude: Double, longitude: Double)
         fun onErro(mensagem: String)
     }
 
+    // pega a localizacao atual do aparelho
     @RequiresPermission(anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun obterLocalizacaoAtual(callback: Callback) {
         val locationRequest = CurrentLocationRequest.Builder()
@@ -45,6 +48,7 @@ class LocalizacaoHelper(
             }
     }
 
+    // converte latitude e longitude em endereco
     private fun obterEndereco(latitude: Double, longitude: Double, callback: Callback) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val geocoder = Geocoder(context, Locale.getDefault())
